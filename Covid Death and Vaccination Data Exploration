@@ -1,22 +1,24 @@
+-- Exploration on the data layout
 SELECT *
 FROM PortfolioProject..CovidDeaths
 ORDER BY 3,4
 
+
+-- -- Exploration on the locations available in the data
 SELECT 
-DISTINCT location,
-continent
+DISTINCT location, continent
 FROM PortfolioProject..CovidVaccination
+WHERE continent IS NOT NULL
 ORDER BY continent 
 
--- Select Data List that we are going to use
 
+-- Selection of data list I am going to use
 SELECT location, date, total_cases, new_cases, total_deaths, population
 FROM PortfolioProject..CovidDeaths
 order by 1,2
 
--- Looking at Total cases vs Total Deaths
--- shows the likelihood of dying if you contract COVID in your country
 
+-- Looking at Total cases vs Total Deaths, which shows the likelihood of dying if you contract COVID in your country
 SELECT 
     location, 
     date, 
@@ -28,8 +30,8 @@ FROM
 Where location like '%states%'
 ORDER BY 1,2;
 
---Looking at the total-cases vs population
 
+--Looking at the total-cases vs population
  SELECT 
     location, 
     date, 
@@ -42,8 +44,8 @@ Where location like '%states%'
 ORDER BY 
     1, 2;
 
--- Looking at countries with the highest infection rate compared to population
 
+-- Looking at countries with the highest infection rate compared to population
 SELECT 
     location, 
    population,
@@ -55,8 +57,8 @@ FROM
 Group by location, Population
 ORDER BY PercentPopulationInfected DESC;
 
--- Showing the countries with highest Death Count per population and its percentage
 
+-- Showing the countries with highest Death Count per population and its percentage
 SELECT 
     location, 
    population,
@@ -71,7 +73,6 @@ ORDER BY PercentPopulationDeath DESC;
 -- CONTINENTS
 
 -- Showing death count by continent
-
 SELECT 
 continent,
    SUM(new_deaths) AS HighestDeathCount
@@ -80,6 +81,7 @@ FROM
 	Where continent IS not null
 Group by continent
 ORDER BY HighestDeathCount DESC;
+
 
 -- Total cases over population on each continent
  SELECT DISTINCT
@@ -97,23 +99,22 @@ ORDER BY  PercentPopulationInfectedContinent
 -- GLOBAL NUMBERS
 
 --number of total cases 
-
 SELECT 
    SUM(new_cases) AS TotalNumberofCases
 FROM 
     PortfolioProject..CovidDeaths
 	WHERE continent IS NOT NULL
 
--- number of deaths
 
+-- number of deaths
 SELECT 
    SUM(new_deaths) AS TotalNumberofDeaths
 FROM 
     PortfolioProject..CovidDeaths
 	WHERE continent IS NOT NULL
 
-	-- Number of deaths and cases reported on each days
 
+-- Number of deaths and cases reported on each days
 SELECT 
 	date,
 	SUM(new_cases)  AS cases,
@@ -125,29 +126,30 @@ FROM PortfolioProject..CovidDeaths
  GROUP BY date
  ORDER BY 1,2
 
- -- number of deaths and cases of COVID in the world
 
+ -- number of deaths and cases of COVID in the world
 SELECT 
 	SUM(new_cases)  AS cases,
 	SUM(new_deaths) AS Deaths,
 	SUM(new_deaths)/SUM(new_cases) *100 AS DeathPercentage
-
 FROM PortfolioProject..CovidDeaths
  WHERE continent IS NOT NULL
  ORDER BY 1,2
 
- -- Looking at Total Population vs Vaccination
 
+ -- Looking at Total Population vs Vaccination
  SELECT 
  dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
  SUM(CAST(vac.new_vaccinations AS FLOAT)) OVER (Partition by dea.location) AS CountryVaccination
  FROM PortfolioProject..CovidDeaths dea
- JOIN PortfolioProject..CovidVaccination vac
- ON dea.location = vac.location
- AND dea.date = vac.date 
+	 JOIN PortfolioProject..CovidVaccination vac
+		 ON dea.location = vac.location
+			AND dea.date = vac.date 
  WHERE dea.continent IS NOT NULL
  ORDER BY 2,3
 
+
+ --the number of vaccinations throughout the days
  SELECT 
     dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
     SUM(CAST(vac.new_vaccinations AS FLOAT)) OVER (PARTITION BY dea.location ORDER BY dea.date) AS CountryVaccination
@@ -175,7 +177,6 @@ ORDER BY
 
 
  -- Looking at Vaccinations in the countries per continent
-
   SELECT 
  dea.continent,
  SUM(population) AS TotalPopulation,
@@ -217,7 +218,6 @@ SELECT * FROM CTE_PeopleVaccinated;
 
 
 -- Creating View for Visualization in Tableau
-
 CREATE VIEW PopulationVaccinate
 AS 
 SELECT 
